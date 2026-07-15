@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Legacy Vault</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  body { font-family: -apple-system, sans-serif; background: #0b0f14; color: #e8ecf1; margin: 0; padding: 24px; }
+  h1 { font-size: 22px; }
+  .card { background: #131a22; border: 1px solid #22303c; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
+  input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; border: 1px solid #22303c; background: #0b0f14; color: #e8ecf1; box-sizing: border-box; }
+  button { background: #3b82f6; border: none; cursor: pointer; font-weight: 600; }
+  button:active { opacity: 0.8; }
+  pre { white-space: pre-wrap; font-size: 13px; background: #0b0f14; padding: 10px; border-radius: 8px; }
+  label { font-size: 13px; opacity: 0.7; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState } = React;
+const API = "https://legacy-vault-asp.onrender.com/api";
+const OWNER_ID = "a8572c44-db1b-4ff3-bc74-4cb3fd284930";
+
+function App() {
+  const [label, setLabel] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [type, setType] = useState("passport");
+  const [result, setResult] = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const addDocument = async () => {
+    setLoading(true);
+    const res = await fetch(`${API}/documents`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ owner_id: OWNER_ID, type, label, expiry_date: expiry })
+    });
+    const data = await res.json();
+    setResult(data);
+    setLoading(false);
+  };
+
+  const checkStatus = async () => {
+    setLoading(true);
+    const res = await fetch(`${API}/status/${OWNER_ID}`);
+    const data = await res.json();
+    setResult(data);
+    setLoading(false);
+  };
+
+  const getPlan = async () => {
+    setLoading(true);
+    const res = await fetch(`${API}/plan/${OWNER_ID}`);
+    const data = await res.json();
+    setResult(data);
+    setLoading(false);
+  };
+
+  return (
+    <div>
+      <h1>🛡️ Legacy Vault</h1>
+      <p style={{opacity:0.7, fontSize:14}}>Track renewals, protect sensitive info, safeguard your digital legacy.</p>
+
+      <div className="card">
+        <label>Add a document</label>
+        <input placeholder="Label (e.g. Nigerian Passport)" value={label} onChange={e => setLabel(e.target.value)} />
+        <input type="date" value={expiry} onChange={e => setExpiry(e.target.value)} />
+        <button onClick={addDocument}>Add Document</button>
+      </div>
+
+      <div className="card">
+        <label>Check life admin status</label>
+        <button onClick={checkStatus}>Check Status</button>
+      </div>
+
+      <div className="card">
+        <label>Generate emergency plan</label>
+        <button onClick={getPlan}>Generate Plan</button>
+      </div>
+
+      {loading && <p>Loading...</p>}
+      {result && (
+        <div className="card">
+          <pre>{JSON.stringify(result, null, 2)}</pre>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
