@@ -2,19 +2,78 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Legacy Vault</title>
 <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
 <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 <style>
-  body { font-family: -apple-system, sans-serif; background: #0b0f14; color: #e8ecf1; margin: 0; padding: 24px; }
-  h1 { font-size: 22px; }
-  .card { background: #131a22; border: 1px solid #22303c; border-radius: 12px; padding: 16px; margin-bottom: 16px; }
-  input, button { width: 100%; padding: 10px; margin-top: 8px; border-radius: 8px; border: 1px solid #22303c; background: #0b0f14; color: #e8ecf1; box-sizing: border-box; }
-  button { background: #3b82f6; border: none; cursor: pointer; font-weight: 600; }
-  button:active { opacity: 0.8; }
-  pre { white-space: pre-wrap; font-size: 13px; background: #0b0f14; padding: 10px; border-radius: 8px; }
-  label { font-size: 13px; opacity: 0.7; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(180deg, #0a0e14 0%, #0d1420 100%);
+    color: #e8ecf1;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+  }
+  .container { max-width: 480px; margin: 0 auto; padding: 20px 16px 60px; }
+  .header { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; padding-top: 8px; }
+  .header h1 { font-size: 21px; margin: 0; font-weight: 700; }
+  .shield { font-size: 24px; }
+  .tagline { font-size: 13px; color: #8b98a5; margin: 0 0 24px; line-height: 1.4; }
+  .card {
+    background: #131a24;
+    border: 1px solid #1f2b38;
+    border-radius: 14px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .card-label { font-size: 12px; font-weight: 600; color: #6b7d8f; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  input, select {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 8px;
+    border-radius: 10px;
+    border: 1px solid #22303c;
+    background: #0b0f16;
+    color: #e8ecf1;
+    font-size: 15px;
+  }
+  input:first-of-type { margin-top: 0; }
+  input::placeholder { color: #536070; }
+  button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 12px;
+    border-radius: 10px;
+    border: none;
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    font-weight: 600;
+    font-size: 15px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  button:active { opacity: 0.75; }
+  button:disabled { opacity: 0.5; }
+  .secondary-btn { background: #1a2430; border: 1px solid #2a3947; }
+  .result-card { animation: fadeIn 0.25s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+  pre {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-size: 12.5px;
+    background: #0b0f16;
+    padding: 12px;
+    border-radius: 10px;
+    line-height: 1.5;
+    max-height: 400px;
+    overflow-y: auto;
+    margin: 0;
+  }
+  .loading-text { font-size: 13px; color: #8b98a5; text-align: center; padding: 8px 0; }
+  .empty-state { font-size: 13px; color: #536070; text-align: center; padding: 20px; }
 </style>
 </head>
 <body>
@@ -32,61 +91,80 @@ function App() {
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const addDocument = async () => {
+  const call = async (fn) => {
     setLoading(true);
+    try {
+      await fn();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addDocument = () => call(async () => {
     const res = await fetch(`${API}/documents`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ owner_id: OWNER_ID, type, label, expiry_date: expiry })
     });
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
-  };
+    setResult(await res.json());
+    setLabel("");
+    setExpiry("");
+  });
 
-  const checkStatus = async () => {
-    setLoading(true);
+  const checkStatus = () => call(async () => {
     const res = await fetch(`${API}/status/${OWNER_ID}`);
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
-  };
+    setResult(await res.json());
+  });
 
-  const getPlan = async () => {
-    setLoading(true);
+  const getPlan = () => call(async () => {
     const res = await fetch(`${API}/plan/${OWNER_ID}`);
-    const data = await res.json();
-    setResult(data);
-    setLoading(false);
-  };
+    setResult(await res.json());
+  });
 
   return (
-    <div>
-      <h1>🛡️ Legacy Vault</h1>
-      <p style={{opacity:0.7, fontSize:14}}>Track renewals, protect sensitive info, safeguard your digital legacy.</p>
+    <div className="container">
+      <div className="header">
+        <span className="shield">🛡️</span>
+        <h1>Legacy Vault</h1>
+      </div>
+      <p className="tagline">Track renewals, protect sensitive info, and safeguard your digital legacy.</p>
 
       <div className="card">
-        <label>Add a document</label>
+        <div className="card-label">Add a Document</div>
         <input placeholder="Label (e.g. Nigerian Passport)" value={label} onChange={e => setLabel(e.target.value)} />
+        <select value={type} onChange={e => setType(e.target.value)}>
+          <option value="passport">Passport</option>
+          <option value="visa">Visa</option>
+          <option value="license">Driver's License</option>
+          <option value="insurance">Insurance</option>
+          <option value="will">Will</option>
+          <option value="contract">Contract</option>
+        </select>
         <input type="date" value={expiry} onChange={e => setExpiry(e.target.value)} />
-        <button onClick={addDocument}>Add Document</button>
+        <button onClick={addDocument} disabled={!label || !expiry || loading}>Add Document</button>
       </div>
 
       <div className="card">
-        <label>Check life admin status</label>
-        <button onClick={checkStatus}>Check Status</button>
+        <div className="card-label">Life Admin Status</div>
+        <button className="secondary-btn" onClick={checkStatus} disabled={loading}>Check Status</button>
       </div>
 
       <div className="card">
-        <label>Generate emergency plan</label>
-        <button onClick={getPlan}>Generate Plan</button>
+        <div className="card-label">Emergency Plan</div>
+        <button className="secondary-btn" onClick={getPlan} disabled={loading}>Generate Plan</button>
       </div>
 
-      {loading && <p>Loading...</p>}
-      {result && (
-        <div className="card">
+      {loading && <p className="loading-text">Loading…</p>}
+
+      {!loading && result && (
+        <div className="card result-card">
+          <div className="card-label">Result</div>
           <pre>{JSON.stringify(result, null, 2)}</pre>
         </div>
+      )}
+
+      {!loading && !result && (
+        <p className="empty-state">Results will appear here</p>
       )}
     </div>
   );
