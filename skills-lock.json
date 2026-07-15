@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "skills": {
+    "okx-agent-payments-protocol": {
+      "source": "okx/onchainos-skills",
+      "sourceType": "github",
+      "skillPath": "skills/okx-agent-payments-protocol/SKILL.md",
+      "computedHash": "0e7fd5ace48daa50200053312bcccd7e980a49e2f14720e94a483ba86ec45c0d"
+    },
+    "okx-agentic-wallet": {
+      "source": "okx/onchainos-skills",
+      "sourceType": "github",
+      "skillPath": "skills/okx-agentic-wallet/SKILL.md",
+      "computedHash": "892b14cba934089a6ac384820bbb71f5043134e03d3155fded2ed993debb033d"
+    },
+    "okx-ai": {
+      "source": "okx/onchainos-skills",
+      "sourceType": "github",
+      "skillPath": "skills/okx-ai/SKILL.md",
+      "computedHash": "4e5a0203fc8e04e656e654a086a0772d71759dad3ac1eedafa9a89a297000a62"
+    },
+    "okx-guide": {
+      "source": "okx/onchainos-skills",
+      "sourceType": "github",
+      "skillPath": "skills/okx-guide/SKILL.md",
+      "computedHash": "ffcaa3a21147173b74c33ea0dfe550e8eae6ea40af1af200dfc0974093638a09"
+    }
+  }
+}

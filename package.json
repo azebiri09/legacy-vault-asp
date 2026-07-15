@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/azebiri09/legacy-vault-asp#readme",
   "dependencies": {
+    "cors": "^2.8.6",
     "crypto-js": "^4.2.0",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
